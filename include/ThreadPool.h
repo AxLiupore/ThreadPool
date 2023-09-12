@@ -7,6 +7,8 @@
 #include <atomic>
 #include <mutex>
 #include <condition_variable>
+#include <functional>
+#include <iostream>
 #include "Thread.h"
 #include "Task.h"
 
@@ -29,7 +31,6 @@ namespace ThreadPool
 			static ThreadPool instance;
 			return instance;
 		}
-
 
 		// 设置线程池的工作模式
 		void setMode(ThreadPoolMode mode);

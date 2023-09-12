@@ -39,7 +39,8 @@ void ThreadPool::ThreadPool::start(size_t size)
 	for (int i = 0; i < m_initThreadsSize; i++)
 	{
 		// 创建thread线程对象的时候，把线程函数给到thread线程对象
-		m_threads.emplace_back(new Thread(std::bind(&ThreadPool::threadFunc, this))); // 接受构造函数所需要的参数，在容器内创建元素，避免不必要的拷贝
+		m_threads.emplace_back(new Thread([this]
+		{ threadFunc(); })); // 接受构造函数所需要的参数，在容器内创建元素，避免不必要的拷贝
 	}
 
 	// 启动所有的线程
@@ -49,7 +50,10 @@ void ThreadPool::ThreadPool::start(size_t size)
 	}
 }
 
+// 定义线程函数（处理任务队列中的任务）
 void ThreadPool::ThreadPool::threadFunc()
 {
-
+	std::cout << "begin threadFunc tid: "
+			  << std::this_thread::get_id()
+			  << " end threadFunc" << std::endl;
 }
