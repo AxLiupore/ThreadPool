@@ -33,10 +33,10 @@
 线程池需要支持两种类型，定义一个枚举类型 ThreadPoolMode 来设置线程池的类型
 
 ```cpp
-enum ThreadPoolMode
+enum class ThreadPoolMode
 {
-    MODE_FIXED, // 固定数量的线程
-    MODE_CACHED // 线程数量可动态增长
+    MODE_FIXED, 
+    MODE_CACHED 
 };
 ```
 
@@ -46,7 +46,29 @@ enum ThreadPoolMode
 
 #### 线程函数
 
-线程函数是处理任务队列中的任务，当在创建 Thread 对象的时候，将要处理的线程函数通过绑定器绑定到 Thread 类上，然后这 Thread 创建一个 thread 去处理这个线程函数
+![threadfunc](https://github.com/AxLiupore/ThreadPool/blob/master/images/threadfunc.jpg)
+
+线程函数是处理任务队列中的任务，当在创建 Thread 对象的时候，将要处理的线程函数通过绑定器绑定到 Thread 类上，然后这 Thread 创建一个 thread 去处理这个线程函数；这个线程函数里面一直循环处理任务，直到线程池对象销毁
+
+通过以下几个步骤循环执行任务
+
+1. 先获取锁
+2. 等待`notEmpty` 条件不为空
+3. 从任务队列中取出一个任务出来
+4. 如果依然有剩余任务，继续通知其他线程执行任务
+5. 通知`notFull` 任务队列不满了，可以继续生产任务
+6. 将当前锁解锁
+7. 当前线程负责执行这个任务
+
+#### 提交任务
+
+用户通过 ThreadPool 里面的`submitTask` 函数将要处理的任务交给线程池去处理
+
+提交任务要保持线程安全，所以通过以下步骤保证线程安全并且完美的实现提交任务
+
+1. 先获取任务队列的锁，将任务队列锁起来
+2. 线程通信，等待任务队列有空余就把任务放到任务队列中去
+3. 因为新放了任务，所以任务队列不为空，就通过线程去出去任务
 
 ### Thread 
 
