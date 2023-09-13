@@ -11,6 +11,7 @@
 #include <iostream>
 #include "Thread.h"
 #include "Task.h"
+#include "Result.h"
 
 namespace ThreadPool
 {
@@ -39,7 +40,7 @@ namespace ThreadPool
 		void setMaxTaskSize(size_t size);
 
 		// 给线程池提交任务
-		void submitTask(const std::shared_ptr<Task>& ptr);
+		Result submitTask(const std::shared_ptr<Task>& ptr);
 
 		// 开启线程池（初始线程数默认为当前CPU的核心线程数）
 		void start(size_t size = std::thread::hardware_concurrency());

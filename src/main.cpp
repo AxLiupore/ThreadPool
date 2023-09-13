@@ -23,6 +23,7 @@ public:
 		}
 		std::cout << "tid:" << std::this_thread::get_id()
 				  << " end." << std::endl;
+		return (ThreadPool::Any)sum;
 	}
 
 private:
@@ -36,9 +37,12 @@ int main()
 
 	pool.start(4);
 
-	pool.submitTask(std::make_shared<MyTask>(1, 1000));
-	pool.submitTask(std::make_shared<MyTask>(1, 10000));
-	pool.submitTask(std::make_shared<MyTask>(1, 1000));
+	for (int i = 0; i < 10; i ++)
+	{
+		ThreadPool::Result result = pool.submitTask(std::make_shared<MyTask>(1, 100));
+		int sum = result.get().cast<int>();
+		std::cout << "sum = " << sum << std::endl;
+	}
 
 	getchar();
 	return 0;

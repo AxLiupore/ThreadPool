@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.26)
 project(thread_pool)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 add_executable(thread_pool src/main.cpp
         include/Thread.h
@@ -14,4 +14,5 @@ add_executable(thread_pool src/main.cpp
         include/Base.h
         include/Semaphore.h
         src/Semaphore.cpp
-        include/Result.h)
+        include/Result.h
+        src/Result.cpp)

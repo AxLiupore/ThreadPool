@@ -25,7 +25,7 @@ void ThreadPool::ThreadPool::setMaxTaskSize(size_t size)
 }
 
 // 给线程池提交任务
-void ThreadPool::ThreadPool::submitTask(const std::shared_ptr<Task>& ptr)
+ThreadPool::Result ThreadPool::ThreadPool::submitTask(const std::shared_ptr<Task>& ptr)
 {
 	// 获取锁
 	std::unique_lock<std::mutex> lock(m_queueMutex);
@@ -35,7 +35,7 @@ void ThreadPool::ThreadPool::submitTask(const std::shared_ptr<Task>& ptr)
 	{ return m_threads.size() < m_maxTaskSize; }))
 	{
 		std::cerr << "task queue is full, submit task fail" << std::endl;
-		return;
+		return Result(ptr, false);
 	}
 
 	// 如果有空余，把任务放入任务队列中
@@ -45,6 +45,9 @@ void ThreadPool::ThreadPool::submitTask(const std::shared_ptr<Task>& ptr)
 
 	// 因为新放了任务，任务队列肯定不空---通知线程去处理任务
 	m_notEmpty.notify_all();
+
+	// 返回任务的Result对象
+	return Result(ptr, true);
 }
 
 // 开启线程池
@@ -104,9 +107,8 @@ void ThreadPool::ThreadPool::start(size_t size)
 		// 当前线程负责执行这个任务
 		if (task != nullptr)
 		{
-			task->run();
-			std::cout << "tid:" << std::this_thread::get_id()
-					  << " finish this task" << std::endl;
+			// 执行任务：把任务的返回值通过setValue方法给到Result
+			task->exec();
 		}
 	}
 }
