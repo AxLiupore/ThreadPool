@@ -92,3 +92,8 @@ public:
 };
 ```
 
+### Any
+
+![threadfunc](https://github.com/AxLiupore/ThreadPool/blob/master/images/any.jpg)
+
+要让线程池去执行要处理的任务，需要继承这个 Task 类，用户的`run` 方法可能的返回值类型都是不同的，需要设计一个任意类型 Any 去返回，这个类能指向其他任意类型；有一个 Base 类型，派生出一个 Derive 类型，通过将数据类型传递到 Derive 类型实现可接受任意类型的类型

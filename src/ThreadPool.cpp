@@ -32,7 +32,7 @@ void ThreadPool::ThreadPool::submitTask(const std::shared_ptr<Task>& ptr)
 
 	// 线程的通信---等待任务队列中可以放任务
 	if (!m_notFull.wait_for(lock, std::chrono::seconds(1), [&]() -> bool
-	{ m_threads.size() < m_maxTaskSize; }))
+	{ return m_threads.size() < m_maxTaskSize; }))
 	{
 		std::cerr << "task queue is full, submit task fail" << std::endl;
 		return;
@@ -41,6 +41,7 @@ void ThreadPool::ThreadPool::submitTask(const std::shared_ptr<Task>& ptr)
 	// 如果有空余，把任务放入任务队列中
 	m_tasks.emplace(ptr);
 	m_taskNumber++;
+	std::cout << "submit task success" << std::endl;
 
 	// 因为新放了任务，任务队列肯定不空---通知线程去处理任务
 	m_notEmpty.notify_all();
@@ -74,9 +75,14 @@ void ThreadPool::ThreadPool::start(size_t size)
 		// 先获取锁
 		std::unique_lock<std::mutex> lock(m_queueMutex);
 
+		std::cout << "tid:" << std::this_thread::get_id()
+				  << " try to task" << std::endl;
 		// 等待notEmpty条件
 		m_notEmpty.wait(lock, [&]() -> bool
-		{ !m_tasks.empty(); });
+		{ return !m_tasks.empty(); });
+
+		std::cout << "tid:" << std::this_thread::get_id()
+				  << " get task" << std::endl;
 
 		// 从任务队列中取出一个任务出来
 		auto task = m_tasks.front();
@@ -99,6 +105,8 @@ void ThreadPool::ThreadPool::start(size_t size)
 		if (task != nullptr)
 		{
 			task->run();
+			std::cout << "tid:" << std::this_thread::get_id()
+					  << " finish this task" << std::endl;
 		}
 	}
 }
