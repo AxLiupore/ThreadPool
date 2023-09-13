@@ -11,4 +11,7 @@ add_executable(thread_pool src/main.cpp
         src/ThreadPool.cpp
         src/Task.cpp
         include/Any.h
-        include/Base.h)
+        include/Base.h
+        include/Semaphore.h
+        src/Semaphore.cpp
+        include/Result.h)
