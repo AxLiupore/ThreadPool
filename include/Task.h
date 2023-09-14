@@ -21,6 +21,7 @@ namespace ThreadPool
 
 		void exec();
 
+		// 设置返回值
 		void setResult(Result* result);
 
 	private:

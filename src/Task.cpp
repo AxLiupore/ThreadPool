@@ -9,7 +9,7 @@ void ThreadPool::Task::exec()
 {
 	if (m_result != nullptr)
 	{
-		m_result->setValue(run()); // 这里发生多态调用
+		m_result->setValue(run()); // 这里发生多态调用，这个run的函数是用户线程的任务
 	}
 }
 

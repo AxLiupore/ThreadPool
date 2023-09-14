@@ -9,6 +9,7 @@
 #include <condition_variable>
 #include <functional>
 #include <iostream>
+#include <unordered_map>
 #include "Thread.h"
 #include "Task.h"
 #include "Result.h"
@@ -39,6 +40,9 @@ namespace ThreadPool
 		// 设置task任务队列上线的阈值
 		void setMaxTaskSize(size_t size);
 
+		// 设置空闲线程的上线阈值
+		void setMaxThreadSize(size_t size);
+
 		// 给线程池提交任务
 		Result submitTask(const std::shared_ptr<Task>& ptr);
 
@@ -56,13 +60,22 @@ namespace ThreadPool
 		// 删除赋值运算重载
 		ThreadPool& operator=(const ThreadPool&) = delete;
 
+		// 判断线程池是否已经开启了
+		[[nodiscard]] bool checkRunning() const;
+
 		// 定义线程函数（处理任务队列中的任务）
-		[[noreturn]] void threadFunc();
+		void threadFunc(int threadID);
 
 	private:
-		std::vector<std::unique_ptr<Thread>> m_threads; // 线程列表
-		std::size_t m_initThreadsSize; // 初始的线程数量
 		ThreadPoolMode m_poolMode; // 线程池的工作模式
+		std::atomic_bool m_isRunning; // 表示当前线程池的启动状态
+
+		std::unordered_map<int, std::unique_ptr<Thread>> m_threads; // 线程列表
+		std::size_t m_initThreadNumber; // 初始的线程数量
+		std::atomic_uint m_threadNumber; // 记录当前线程池的线程数量
+		std::atomic_uint m_idleThreadNumber; // 记录空闲线程的数量
+		std::size_t m_maxThreadSize; // 线程数量的阈值
+
 		std::queue<std::shared_ptr<Task>> m_tasks; // 任务队列
 		std::atomic_uint m_taskNumber; // 任务的数量
 		std::size_t m_maxTaskSize; // 任务队列数量的阈值

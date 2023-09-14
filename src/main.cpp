@@ -35,14 +35,15 @@ int main()
 {
 	ThreadPool::ThreadPool& pool = ThreadPool::ThreadPool::getInstance();
 
+	pool.setMode(ThreadPool::ThreadPoolMode::MODE_CACHED);
 	pool.start(4);
 
-	for (int i = 0; i < 10; i ++)
-	{
-		ThreadPool::Result result = pool.submitTask(std::make_shared<MyTask>(1, 100));
-		int sum = result.get().cast<int>();
-		std::cout << "sum = " << sum << std::endl;
-	}
+	ThreadPool::Result result1 = pool.submitTask(std::make_shared<MyTask>(1, 100000));
+	ThreadPool::Result result2 = pool.submitTask(std::make_shared<MyTask>(1, 100000));
+	ThreadPool::Result result3 = pool.submitTask(std::make_shared<MyTask>(1, 100000));
+	pool.submitTask(std::make_shared<MyTask>(1, 100000));
+	pool.submitTask(std::make_shared<MyTask>(1, 100000));
+	pool.submitTask(std::make_shared<MyTask>(1, 100000));
 
 	getchar();
 	return 0;
