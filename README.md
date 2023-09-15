@@ -53,10 +53,10 @@ enum class ThreadPoolMode
 通过以下几个步骤循环执行任务
 
 1. 先获取锁
-2. 等待`notEmpty` 条件不为空
+2. 等待`m_notEmpty` 条件不为空
 3. 从任务队列中取出一个任务出来
 4. 如果依然有剩余任务，继续通知其他线程执行任务
-5. 通知`notFull` 任务队列不满了，可以继续生产任务
+5. 通知`m_notFull` 任务队列不满了，可以继续生产任务
 6. 将当前锁解锁
 7. 当前线程负责执行这个任务
 
@@ -106,7 +106,7 @@ Thread 类接受 ThreadPool 传递过来的线程函数，通过`start` 函数�
 
 ### Cached
 
-设置 ThreadPool 的模式，保证在 ThreadPool 开启之后不能修改一些属性，增加变量`isRunning` 去判断是否已经开启了，但开启了，就不做操作
+设置 ThreadPool 的模式，保证在 ThreadPool 开启之后不能修改一些属性，增加变量`m_isRunning` 去判断是否已经开启了，但开启了，就不做操作
 
 当设置 ThreadPool 模式为 Cached 模式之后，对线程会进行判断：
 
@@ -116,3 +116,13 @@ Thread 类接受 ThreadPool 传递过来的线程函数，通过`start` 函数�
     - 记录线程数量的相关变量的值的修改
     - 把线程对象从线程列表容器中删除，通过线程 ID 找到线程，然后再从 ThreadPool 中删除
     - 在这里要将线程列表的数据类型修改为`map` 类型，因为要删除线程要有一个唯一标识
+
+### Recycle
+
+这个模块要将 ThreadPool 的一些资源进行回收
+
+1. 在 ThreadPool 析构函数中，将`m_isRunning` 设置为 false，这样就能避免不必要的错误；里面一些容器不需要管，会自动析构，导致里面的智能指针也会自动析构
+2. 增加一个条件变量用于回收线程资源，当条件变量根据`m_isRunning` 是否为真来进行资源的释放
+
+### DeadLock
+

@@ -45,6 +45,11 @@ int main()
 	pool.submitTask(std::make_shared<MyTask>(1, 100000));
 	pool.submitTask(std::make_shared<MyTask>(1, 100000));
 
-	getchar();
+	auto sum1 = result1.get().cast<int>();
+	std::cout << sum1 << std::endl;
+	auto sum2 = result2.get().cast<int>();
+	auto sum3 = result3.get().cast<int>();
+
+	std::cout << sum1 + sum2 + sum3 << std::endl;
 	return 0;
 }

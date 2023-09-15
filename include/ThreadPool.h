@@ -61,10 +61,14 @@ namespace ThreadPool
 		ThreadPool& operator=(const ThreadPool&) = delete;
 
 		// 判断线程池是否已经开启了
-		[[nodiscard]] bool checkRunning() const;
+		[[nodiscard]] bool checkTurnOn() const;
 
 		// 定义线程函数（处理任务队列中的任务）
 		void threadFunc(int threadID);
+
+		// 判断是否在运行
+		bool checkRunning() const;
+
 
 	private:
 		ThreadPoolMode m_poolMode; // 线程池的工作模式
@@ -82,6 +86,7 @@ namespace ThreadPool
 		std::mutex m_queueMutex; // 任务队列锁，保证任务队列的线程安全
 		std::condition_variable m_notFull; // 表示任务队列不满，可以放任务进去
 		std::condition_variable m_notEmpty; // 表示任务队列不空，线程池的线程就可以对任务队列进行处理
+		std::condition_variable m_exitCond; // 等待线程资源全部回收
 	};
 }
 
