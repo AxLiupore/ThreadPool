@@ -19,9 +19,9 @@ ThreadPool::ThreadPool::ThreadPool() : m_taskNumber(0),
 ThreadPool::ThreadPool::~ThreadPool()
 {
 	m_isRunning = false;
-	m_notEmpty.notify_all(); // 告诉所有线程不空
 	// 等待线程池里面所有的线程返回，两种状态：阻塞、正在执行任务中
 	std::unique_lock<std::mutex> lock(m_queueMutex);
+	m_notEmpty.notify_all(); // 告诉所有线程不空
 	m_exitCond.wait(lock, [&]() -> bool
 	{ return m_tasks.empty(); }); // 线程为空了
 }
@@ -126,16 +126,14 @@ void ThreadPool::ThreadPool::threadFunc(int threadId)
 {
 	auto lastTime = std::chrono::high_resolution_clock::now(); // 上一次执行的时间
 
-	while (checkRunning())
+	while (m_isRunning)
 	{
 		// 先获取锁
 		std::unique_lock<std::mutex> lock(m_queueMutex);
-
 		std::cout << "tid:" << std::this_thread::get_id()
 				  << " try to task" << std::endl;
-
 		// cached模式下：有可能已经创建了很多线程，但是空闲时间超过了60s,应该把多余的线程回收掉
-		while (m_tasks.empty())
+		while (m_tasks.empty() && m_isRunning)
 		{
 			if (m_poolMode == ThreadPoolMode::MODE_CACHED)
 			{
@@ -151,7 +149,7 @@ void ThreadPool::ThreadPool::threadFunc(int threadId)
 						m_idleThreadNumber--;
 						m_threadNumber--;
 						std::cout << "threadID:" << std::this_thread::get_id() << " exit!" << std::endl;
-						return;
+						return; // 结束当前线程
 					}
 				}
 			}
@@ -160,15 +158,13 @@ void ThreadPool::ThreadPool::threadFunc(int threadId)
 				// 等待notEmpty条件
 				m_notEmpty.wait(lock);
 			}
-			// 线程要结束，回收线程资源
-			if (!checkRunning())
-			{
-				m_threads.erase(threadId);
-				std::cout << "threadID:" << std::this_thread::get_id() << " exit!" << std::endl;
-				m_exitCond.notify_all();
-				return;
-			}
 		}
+		// 线程要结束，回收线程资源
+		if (!m_isRunning)
+		{
+			break;
+		}
+
 		m_idleThreadNumber--;
 		std::cout << "tid:" << std::this_thread::get_id()
 				  << " get task" << std::endl;
@@ -193,17 +189,12 @@ void ThreadPool::ThreadPool::threadFunc(int threadId)
 		m_idleThreadNumber++;
 		lastTime = std::chrono::high_resolution_clock::now(); // 更新线程执行完任务的时间
 	}
-
 	m_threads.erase(threadId);
 	std::cout << "threadID:" << std::this_thread::get_id() << " exit!" << std::endl;
+	m_exitCond.notify_all();
 }
 
 bool ThreadPool::ThreadPool::checkTurnOn() const
-{
-	return m_isRunning;
-}
-
-bool ThreadPool::ThreadPool::checkRunning() const
 {
 	return m_isRunning;
 }

@@ -66,10 +66,6 @@ namespace ThreadPool
 		// 定义线程函数（处理任务队列中的任务）
 		void threadFunc(int threadID);
 
-		// 判断是否在运行
-		bool checkRunning() const;
-
-
 	private:
 		ThreadPoolMode m_poolMode; // 线程池的工作模式
 		std::atomic_bool m_isRunning; // 表示当前线程池的启动状态

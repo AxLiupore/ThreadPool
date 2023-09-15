@@ -124,5 +124,5 @@ Thread 类接受 ThreadPool 传递过来的线程函数，通过`start` 函数�
 1. 在 ThreadPool 析构函数中，将`m_isRunning` 设置为 false，这样就能避免不必要的错误；里面一些容器不需要管，会自动析构，导致里面的智能指针也会自动析构
 2. 增加一个条件变量用于回收线程资源，当条件变量根据`m_isRunning` 是否为真来进行资源的释放
 
-### DeadLock
+## 动态库
 

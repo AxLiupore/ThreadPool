@@ -51,5 +51,6 @@ int main()
 	auto sum3 = result3.get().cast<int>();
 
 	std::cout << sum1 + sum2 + sum3 << std::endl;
+	getchar();
 	return 0;
 }
